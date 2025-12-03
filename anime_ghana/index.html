@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Anime Ghana</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Background image provided via CSS: place `images/bg-anime.jpg` in the images folder -->
+  <header class="site-header">
+    <div class="container">
+      <a class="logo" href="index.html">
+        <img src="assets/logo.svg" alt="Anime Ghana logo">
+        <span class="site-title">Anime Ghana</span>
+      </a>
+      <div class="header-utilities">
+        <a id="following-link" class="following-link" href="community.html?view=following" style="display:none">Following (<span id="following-count">0</span>)</a>
+        <a id="notif-link" class="following-link" href="moderation.html" style="display:none">🔔 <span id="notif-count">0</span></a>
+      </div>
+      <nav>
+        <ul class="nav">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="community.html">Community</a></li>
+          <li><a href="news.html">News</a></li>
+          <li><a href="manga.html">Manga</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </nav>
+      <div class="header-actions">
+        <div class="autocomplete">
+          <form class="search-form" id="header-search" action="news.html" method="get" role="search" autocomplete="off">
+            <input id="search-input" type="search" name="search" placeholder="Search anime or news..." aria-label="Search anime or news" aria-autocomplete="list" aria-controls="autocomplete-list">
+            <button aria-label="Search">🔍</button>
+          </form>
+          <div id="autocomplete-list" class="autocomplete-list" role="listbox" hidden></div>
+        </div>
+        <button id="news-assistant-btn" class="assistant-btn" title="Get a quick AI summary of anime news">News AI</button>
+        <div class="auth-area">
+          <button class="auth-btn" id="sign-in-btn">Sign in</button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main class="container">
+    <section class="hero">
+      <div class="hero-inner">
+        <h2>Welcome to Anime Ghana</h2>
+        <p>Your hub for Ghana's anime community, latest news and manga recommendations.</p>
+        <a class="btn" href="community.html">Join the Community</a>
+      </div>
+    </section>
+    <!-- Anime grid: replace placeholder images in `images/` with your own art -->
+    <section class="anime-grid" aria-label="Featured anime">
+      <a class="anime-card" href="news.html?anime=one-piece">
+        <img src="one-piece.jpg" alt="One Piece poster" loading="lazy">
+        <div class="card-body">
+          <h3>One Piece</h3>
+          <p>Epic pirate adventure following Monkey D. Luffy and the Straw Hat crew as they chase the legendary treasure.</p>
+        </div>
+      </a>
+      <a class="anime-card" href="news.html?anime=attack-on-titan">
+        <img src="attack-on-titan.jpg" alt="Attack on Titan poster" loading="lazy">
+        <div class="card-body">
+          <h3>Attack On Titan</h3>
+          <p>Humanity fights for survival against gigantic Titans — dark, intense storytelling and shocking twists.</p>
+        </div>
+      </a>
+      <a class="anime-card" href="news.html?anime=naruto">
+        <img src="download.jpg" alt="Naruto poster" loading="lazy">
+        <div class="card-body">
+          <h3>Naruto</h3>
+          <p>The coming-of-age story of Naruto Uzumaki — themes of friendship, rivalry, and perseverance.</p>
+        </div>
+      </a>
+      <a class="anime-card" href="news.html?anime=hxh">
+        <img src="my-anime-for-life.jpg" alt="Hunter x Hunter poster" loading="lazy">
+        <div class="card-body">
+          <h3>Hunter x Hunter</h3>
+          <p>Adventure and strategy with complex characters — celebrated for its storytelling and Nen system.</p>
+        </div>
+      </a>
+      <a class="anime-card" href="news.html?anime=bleach">
+        <img src="bleach.jpg" alt="Bleach poster" loading="lazy">
+        <div class="card-body">
+          <h3>Bleach</h3>
+          <p>Ichigo Kurosaki becomes a Soul Reaper, battling hollows and exploring the spirit world.</p>
+        </div>
+      </a>
+      <a class="anime-card" href="news.html?anime=dragon-ball">
+        <img src="dragonball-z.jpg" alt="Dragon Ball poster" loading="lazy">
+        <div class="card-body">
+          <h3>Dragon Ball</h3>
+          <p>Classic shonen series featuring Goku's rise through epic battles and legendary transformations.</p>
+        </div>
+      </a>
+      <a class="anime-card" href="news.html?anime=cowboy-bebop">
+        <img src="cowboy-bebop.jpg" alt="Cowboy Bebop poster" loading="lazy">
+        <div class="card-body">
+          <h3>Cowboy Bebop</h3>
+          <p>Stylish space western following a crew of bounty hunters — known for tone, music, and worldbuilding.</p>
+        </div>
+      </a>
+      <a class="anime-card" href="news.html?anime=gachiakuta">
+        <img src="gachaiakuta.jpg" alt="Gachiakuta poster" loading="lazy">
+        <div class="card-body">
+          <h3>Gachiakuta</h3>
+          <p>User-provided artwork for Gachiakuta; learn more via the news link for community highlights.</p>
+        </div>
+      </a>
+      <!-- New cards: Jujutsu Kaisen and Solo Leveling -->
+      <a class="anime-card" href="news.html?anime=jujutsu-kaisen">
+        <img src="jujutsu-kaisen.jpg" alt="Jujutsu Kaisen poster" loading="lazy">
+        <div class="card-body">
+          <h3>Jujutsu Kaisen</h3>
+          <p>Recent hit known for breathtaking fight choreography and memorable ensemble cast.</p>
+        </div>
+      </a>
+      <a class="anime-card" href="news.html?anime=solo-leveling">
+        <img src="solo leveling.jpg" alt="Solo Leveling poster" loading="lazy">
+        <div class="card-body">
+          <h3>Solo Leveling</h3>
+          <p>Popular manhwa adaptation known for solo-protagonist progression and high-impact action sequences.</p>
+        </div>
+      </a>
+    </section>
+    <section class="highlights">
+      <article>
+        <h3>Latest News</h3>
+        <p><a href="news.html">Read the latest updates</a></p>
+      </article>
+      <article>
+        <h3>Featured Manga</h3>
+        <p><a href="manga.html">Explore manga picks</a></p>
+      </article>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2025 Anime Ghana</p>
+    </div>
+  </footer>
+  <script>
+    // Reveal anime cards on scroll using IntersectionObserver
+    (function(){
+      const cards = document.querySelectorAll('.anime-card');
+      if(!('IntersectionObserver' in window)){
+        // fallback: show all
+        cards.forEach(c=>c.classList.add('visible'));
+        return;
+      }
+      const obs = new IntersectionObserver((entries, observer)=>{
+        entries.forEach(entry=>{
+          if(entry.isIntersecting){
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },{threshold:0.15});
+      cards.forEach(c=>obs.observe(c));
+    })();
+  </script>
+  <script>
+    // Replace placeholder card images and descriptions with Jikan-provided originals
+    (function(){
+      if(!('fetch' in window)) return;
+      const cards = document.querySelectorAll('.anime-grid .anime-card');
+      // For each card, read the anime slug from its href (news.html?anime=slug)
+          cards.forEach(async card=>{
+        try{
+          const href = card.getAttribute('href') || '';
+          const m = href.match(/[?&]anime=([^&]+)/);
+          const slug = m ? decodeURIComponent(m[1]) : null;
+          if(!slug) return;
+          // no forced image: proceed to query Jikan for this card's poster and synopsis
+          // If the img currently points to a local file (not an external URL), keep it — user-provided images should not be overwritten
+          const existingImg = card.querySelector('img');
+          const currentSrcAttr = existingImg && existingImg.getAttribute('src');
+          if(currentSrcAttr && !/^https?:\/\//i.test(currentSrcAttr) && !currentSrcAttr.startsWith('data:')){
+            // assume this is a local file (relative path) — skip Jikan replacement
+            return;
+          }
+
+          // Map slugs to one or more search candidates to improve matching
+          const map = {
+            'one-piece':['One Piece'],
+            'attack-on-titan':['Attack on Titan'],
+            'naruto':['Naruto'],
+            'hxh':['Hunter x Hunter','Hunter × Hunter'],
+            'bleach':['Bleach'],
+            'dragon-ball':['Dragon Ball Super','Dragon Ball Z','Dragon Ball'],
+            'cowboy-bebop':['Cowboy Bebop'],
+            'gachiakuta':['Gatchaman','Gatcha','Gachiakuta']
+          };
+          const candidates = map[slug] || [slug.replace(/[-_]/g,' ')];
+          let item = null;
+          let usedQuery = '';
+          for(const q of candidates){
+            try{
+              const res = await fetch('https://api.jikan.moe/v4/anime?q='+encodeURIComponent(q)+'&limit=1');
+              if(!res.ok) continue;
+              const js = await res.json();
+              if(js.data && js.data.length>0){ item = js.data[0]; usedQuery = q; break; }
+            }catch(err){
+              // try next candidate on errors
+              continue;
+            }
+          }
+          if(!item) return;
+          // pick best image url
+          const img = (item.images && (item.images.jpg?.image_url || item.images.webp?.image_url)) || '';
+          const synopsis = item.synopsis || '';
+          const title = item.title || (usedQuery || slug);
+          // update image
+          const imgEl = card.querySelector('img');
+          if(imgEl && img) imgEl.src = img;
+          // update title (if different)
+          const h3 = card.querySelector('.card-body h3');
+          if(h3) h3.textContent = title;
+          // update description: use synopsis (trim to sensible length)
+          const p = card.querySelector('.card-body p');
+          if(p){
+            const trimmed = synopsis.split('\n').join(' ').trim();
+            p.textContent = trimmed.length? (trimmed.length>160? trimmed.slice(0,157)+'...':trimmed) : p.textContent;
+          }
+        }catch(e){
+          // ignore per-card failures
+          console.error('card update failed', e);
+        }
+      });
+    })();
+  </script>
+  <!-- Auth modal and header behavior -->
+  <div class="modal-backdrop" id="auth-modal">
+    <div class="modal card" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <div class="modal-header">
+        <h3 id="auth-title">Sign in to Anime Ghana</h3>
+        <button class="modal-close" id="modal-close" aria-label="Close sign in dialog">✕</button>
+      </div>
+      <div class="modal-body">
+        <div>
+          <div class="modal-sub">Choose a provider to continue. We'll only store your display name and avatar locally for this demo.</div>
+          <div class="social-grid" role="list">
+            <button class="social-btn google" data-provider="google" aria-label="Continue with Google">
+              <div class="icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M21.35 11.1h-9.2v2.96h5.3c-.23 1.51-1.36 3.05-3.1 3.05-1.88 0-3.4-1.55-3.4-3.46s1.52-3.46 3.4-3.46c1.05 0 1.74.44 2.15.8l1.86-1.78C16.4 7.5 15.05 7 13.45 7 9.85 7 7 9.95 7 13.55S9.85 20.1 13.45 20.1c4.1 0 7.1-3.05 7.1-9 0-.6-.05-1.1-.2-1.99z"/></svg></div>
+              <span>Google</span>
+            </button>
+            <button class="social-btn tiktok" data-provider="tiktok" aria-label="Continue with TikTok">
+              <div class="icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#fff" d="M12 2v10.5A4.5 4.5 0 0 1 7.5 17 4.5 4.5 0 0 1 3 12.5V10a8 8 0 0 0 9 8V2z"/></svg></div>
+              <span>TikTok</span>
+            </button>
+            <button class="social-btn discord" data-provider="discord" aria-label="Continue with Discord">
+              <div class="icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#5865F2"></rect><path fill="#fff" d="M7.2 8.6c0 0-0.6 0.8-0.7 1.6 0 0 1.1-0.2 1.6-0.2 0 0 0.1-1 0.1-1.3 0 0-0.9-0.1-1-0.1zM16.8 8.6c0 0 0.6 0.8 0.7 1.6 0 0-1.1-0.2-1.6-0.2 0 0-0.1-1-0.1-1.3 0 0 0.9-0.1 1-0.1zM12 18.5c-2.5 0-4.6-1.1-6.1-2.9 0 0 0.7 0.3 1.3 0.5 0 0 0.9 0.8 5 0.8s5-0.8 5-0.8c0.6-0.2 1.3-0.5 1.3-0.5-1.5 1.8-3.6 2.9-6.1 2.9zM8.6 11.2c0 0.9 0.8 1.6 1.8 1.6s1.8-0.7 1.8-1.6-0.8-1.6-1.8-1.6-1.8 0.7-1.8 1.6zM13.8 11.2c0 0.9 0.8 1.6 1.8 1.6s1.8-0.7 1.8-1.6-0.8-1.6-1.8-1.6-1.8 0.7-1.8 1.6z"/></svg></div>
+              <span>Discord</span>
+            </button>
+            <button class="social-btn instagram" data-provider="instagram" aria-label="Continue with Instagram">
+              <div class="icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect width="32" height="32" rx="6" fill="#cc2366"></rect><text x="16" y="21" font-family="Segoe UI, Arial, sans-serif" font-size="14" text-anchor="middle" fill="#fff">I</text></svg></div>
+              <span>Instagram</span>
+            </button>
+          </div>
+          <div class="social-note">Your profile information stays in your browser for this demo. No external authentication occurs.</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div>Need help? <a href="about.html">Learn more</a></div>
+        <div style="opacity:.85">By continuing you agree to our <a href="#">Terms</a>.</div>
+      </div>
+    </div>
+  </div>
+  <!-- Profile setup (shown after choosing a provider) -->
+  <div class="modal-backdrop" id="profile-setup-modal" style="display:none">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="profile-setup-title">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 id="profile-setup-title">Set your username and avatar</h3>
+        <button class="modal-close" id="profile-setup-close">✕</button>
+      </div>
+      <p>Choose a display name and optionally upload an avatar image for your profile.</p>
+      <form id="profile-setup-form">
+        <div class="profile-row">
+          <div class="profile-left">
+            <div id="avatar-drop" class="avatar-drop" title="Click or drop an image here">
+              <div id="avatar-drop-inner" class="avatar-drop-inner">
+                <div style="text-align:center;max-width:88px"><div style="font-size:12px;color:#666">Avatar</div><div style="font-size:12px;color:#999;margin-top:6px">Click or drop</div></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center">
+              <label class="upload-cta" id="upload-btn" for="profile-avatar-input">Upload avatar</label>
+              <button type="button" class="remove-avatar" id="remove-avatar" style="display:none">Remove avatar</button>
+            </div>
+          </div>
+          <div class="profile-right">
+            <div class="field">
+              <label for="profile-name"><strong>Display name</strong></label>
+              <input id="profile-name" type="text" placeholder="Display name (required)" required maxlength="24" />
+              <div style="display:flex;justify-content:space-between;align-items:center"><div class="hint">This is public. Keep it friendly.</div><div class="char-counter" id="name-count">0/24</div></div>
+              <div class="validation-msg" id="name-msg"></div>
+            </div>
+            <div class="field">
+              <div style="display:flex;gap:8px;align-items:center"><button type="button" class="suggest-btn" id="suggest-btn">Suggest a username</button><div class="hint">Or edit the name above.</div></div>
+            </div>
+            <div id="profile-avatar-preview" style="margin-top:8px"></div>
+          </div>
+        </div>
+        <input id="profile-avatar-input" type="file" accept="image/*" style="display:none" />
+        <div class="profile-actions"><button class="post-btn" id="profile-save" type="submit">Save profile</button><button class="post-btn" type="button" id="profile-cancel">Cancel</button></div>
+        <div class="profile-success" id="profile-success">Profile saved ✓</div>
+      </form>
+    </div>
+  </div>
+  <script>
+    // Simple client-side simulated auth (purely UI/localStorage). Replace with real OAuth in production.
+    (function(){
+      const signInBtn = document.getElementById('sign-in-btn');
+      const modal = document.getElementById('auth-modal');
+      const modalClose = document.getElementById('modal-close');
+      const socialBtns = document.querySelectorAll('.social-btn');
+
+      function updateHeader(){
+        const user = JSON.parse(localStorage.getItem('agh_user')||'null');
+        const authArea = document.querySelector('.auth-area');
+        authArea.innerHTML = '';
+        if(user){
+          const pill = document.createElement('div');
+          pill.className = 'user-pill';
+          pill.innerHTML = `<span class="user-avatar"></span><strong>${user.name}</strong> <button class="auth-btn" id="sign-out">Sign out</button>`;
+          authArea.appendChild(pill);
+          // show avatar image or initials if provided
+          try{
+            const avatarEl = pill.querySelector('.user-avatar');
+            if(user.avatar){
+              avatarEl.style.backgroundImage = `url('${user.avatar}')`;
+              avatarEl.style.backgroundSize = 'cover';
+              avatarEl.style.backgroundPosition = 'center';
+              avatarEl.textContent = '';
+            } else {
+              // initials fallback
+              const initials = (user.name||'').split(' ').map(s=>s[0]||'').slice(0,2).join('').toUpperCase();
+              avatarEl.textContent = initials;
+            }
+          }catch(e){}
+          document.getElementById('sign-out').addEventListener('click', ()=>{ localStorage.removeItem('agh_user'); updateHeader(); // hide following link when signed out
+            document.querySelectorAll('#following-link').forEach(el=>el.style.display='none'); document.querySelectorAll('#following-count').forEach(el=>el.textContent = 0);
+          });
+          // show following link and count for this user
+          try{
+            const id = user.provider+':'+(user.name||user.provider);
+            const follows = JSON.parse(localStorage.getItem('agh_follows_'+id)||'[]');
+            document.querySelectorAll('#following-count').forEach(el=>el.textContent = follows.length);
+            document.querySelectorAll('#following-link').forEach(el=>el.style.display='inline-flex');
+          }catch(e){}
+        } else {
+          const btn = document.createElement('button');
+          btn.className = 'auth-btn';
+          btn.id = 'sign-in-btn-2';
+          btn.textContent = 'Sign in';
+          authArea.appendChild(btn);
+          btn.addEventListener('click', ()=> modal.style.display = 'flex');
+        }
+      }
+
+      signInBtn && signInBtn.addEventListener('click', ()=> modal.style.display = 'flex');
+      modalClose && modalClose.addEventListener('click', ()=> modal.style.display = 'none');
+      modal.addEventListener('click', (e)=>{ if(e.target === modal) modal.style.display = 'none'; });
+
+      // When a provider is chosen, open the profile setup flow so the user can pick a display name and avatar
+      const profileModal = document.getElementById('profile-setup-modal');
+      const profileClose = document.getElementById('profile-setup-close');
+      const profileForm = document.getElementById('profile-setup-form');
+      const profileCancel = document.getElementById('profile-cancel');
+      const profileName = document.getElementById('profile-name');
+      const profileAvatarInput = document.getElementById('profile-avatar-input');
+      const profileAvatarPreview = document.getElementById('profile-avatar-preview');
+      let _pendingProvider = null;
+
+      socialBtns.forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          _pendingProvider = btn.dataset.provider || 'local';
+          // prefill suggested name
+          profileName.value = _pendingProvider.charAt(0).toUpperCase()+_pendingProvider.slice(1)+ ' User';
+          // show profile-setup modal and hide auth modal
+          profileAvatarPreview.innerHTML = '';
+          profileAvatarInput.value = '';
+          modal.style.display = 'none';
+          profileModal.style.display = 'flex';
+        });
+      });
+
+      function saveUserObject(userObj){
+        try{ localStorage.setItem('agh_user', JSON.stringify(userObj)); }catch(e){ console.error('save user failed',e); }
+        profileModal.style.display = 'none';
+        updateHeader();
+        try{
+          const id = userObj.provider+':'+(userObj.name||userObj.provider);
+          const follows = JSON.parse(localStorage.getItem('agh_follows_'+id)||'[]');
+          document.querySelectorAll('#following-count').forEach(el=>el.textContent = follows.length);
+          document.querySelectorAll('#following-link').forEach(el=>el.style.display='inline-flex');
+        }catch(e){}
+      }
+
+      profileForm.addEventListener('submit', async (ev)=>{
+        ev.preventDefault();
+        const name = (profileName.value||'').trim();
+        if(!name) return alert('Please enter a display name');
+        // read avatar file (if provided) as data URL
+        const f = profileAvatarInput.files && profileAvatarInput.files[0];
+        if(f){
+          const reader = new FileReader();
+          reader.onload = function(e){
+            const data = e.target.result;
+            const u = { name, provider: _pendingProvider || 'local', avatar: data };
+            saveUserObject(u);
+          };
+          reader.readAsDataURL(f);
+        } else {
+          const u = { name, provider: _pendingProvider || 'local' };
+          saveUserObject(u);
+        }
+      });
+
+      profileCancel.addEventListener('click', ()=>{ profileModal.style.display = 'none'; modal.style.display = 'flex'; _pendingProvider = null; });
+      profileClose.addEventListener('click', ()=>{ profileModal.style.display = 'none'; modal.style.display = 'flex'; _pendingProvider = null; });
+      profileModal.addEventListener('click', (e)=>{ if(e.target === profileModal){ profileModal.style.display = 'none'; modal.style.display = 'flex'; _pendingProvider = null; } });
+
+      profileAvatarInput.addEventListener('change', ()=>{
+        const f = profileAvatarInput.files && profileAvatarInput.files[0];
+        if(!f){ profileAvatarPreview.innerHTML = ''; return; }
+        if(!f.type.startsWith('image/')){ profileAvatarPreview.innerHTML = '<div class="muted">Please select an image file</div>'; return; }
+        const r = new FileReader(); r.onload = function(e){ profileAvatarPreview.innerHTML = `<img src="${e.target.result}" alt="avatar preview" style="width:72px;height:72px;border-radius:50%;object-fit:cover">`; }; r.readAsDataURL(f);
+      });
+
+      // Enhanced avatar drop & preview + validation and suggestions
+      const avatarDrop = document.getElementById('avatar-drop');
+      const avatarDropInner = document.getElementById('avatar-drop-inner');
+      const uploadBtn = document.getElementById('upload-btn');
+      const removeAvatarBtn = document.getElementById('remove-avatar');
+      const nameCount = document.getElementById('name-count');
+      const nameMsg = document.getElementById('name-msg');
+      const suggestBtn = document.getElementById('suggest-btn');
+
+      function showPreviewDataURL(dataURL){
+        profileAvatarPreview.innerHTML = `<img src="${dataURL}" alt="avatar preview" style="width:72px;height:72px;border-radius:50%;object-fit:cover">`;
+        avatarDropInner.innerHTML = `<img src="${dataURL}" alt="avatar" style="width:100%;height:100%;object-fit:cover">`;
+        removeAvatarBtn.style.display = 'inline-block';
+      }
+
+      function clearPreview(){
+        profileAvatarPreview.innerHTML = '';
+        avatarDropInner.innerHTML = `<div style="text-align:center;max-width:88px"><div style="font-size:12px;color:#666">Avatar</div><div style="font-size:12px;color:#999;margin-top:6px">Click or drop</div></div>`;
+        removeAvatarBtn.style.display = 'none';
+        profileAvatarInput.value = '';
+      }
+
+      removeAvatarBtn.addEventListener('click', ()=>{ clearPreview(); });
+
+      avatarDrop.addEventListener('click', ()=>{ profileAvatarInput.click(); });
+      avatarDrop.addEventListener('dragover', (e)=>{ e.preventDefault(); avatarDrop.classList.add('dragover'); });
+      avatarDrop.addEventListener('dragleave', (e)=>{ avatarDrop.classList.remove('dragover'); });
+      avatarDrop.addEventListener('drop', (e)=>{ e.preventDefault(); avatarDrop.classList.remove('dragover'); const f = (e.dataTransfer.files && e.dataTransfer.files[0]); if(f && f.type.startsWith('image/')){ profileAvatarInput.files = e.dataTransfer.files; const r = new FileReader(); r.onload = function(ev){ showPreviewDataURL(ev.target.result); }; r.readAsDataURL(f); } else { alert('Please drop an image file'); } });
+
+      profileAvatarInput.addEventListener('change', (e)=>{
+        const f = profileAvatarInput.files && profileAvatarInput.files[0];
+        if(!f) { clearPreview(); return; }
+        if(!f.type.startsWith('image/')){ alert('Please select an image file'); profileAvatarInput.value = ''; return; }
+        // limit size to ~1.5MB for localStorage friendliness
+        if(f.size > 1572864){ if(!confirm('Avatar larger than 1.5MB may slow performance. Use anyway?')){ profileAvatarInput.value=''; return; } }
+        const reader = new FileReader(); reader.onload = function(ev){ showPreviewDataURL(ev.target.result); }; reader.readAsDataURL(f);
+      });
+
+      // name validation and character counter
+      profileName.addEventListener('input', ()=>{
+        const v = profileName.value || '';
+        nameCount.textContent = `${v.length}/24`;
+        const ok = /^[\w \-\.]{2,24}$/.test(v);
+        if(!ok){ nameMsg.style.display='block'; nameMsg.textContent = 'Use 2–24 characters: letters, numbers, spaces, dot or dash.'; nameMsg.classList.remove('ok'); }
+        else { nameMsg.style.display='block'; nameMsg.textContent = 'Looks good'; nameMsg.classList.add('ok'); }
+      });
+
+      // generate suggestion
+      suggestBtn.addEventListener('click', ()=>{
+        const base = (_pendingProvider || 'user').replace(/[^a-zA-Z0-9]/g,'').toLowerCase();
+        const rnd = Math.floor(Math.random()*9000)+1000;
+        const suggestion = (base? base+'_'+rnd : 'user_'+rnd);
+        profileName.value = suggestion;
+        profileName.dispatchEvent(new Event('input'));
+      });
+
+      // uniqueness check against stored agh_users
+      function isNameTaken(name){ try{ const arr = JSON.parse(localStorage.getItem('agh_users')||'[]'); return arr.indexOf(name) !== -1; }catch(e){ return false } }
+
+      // Save flow: ensure name valid and not taken (unless same as existing) then persist
+      profileForm.addEventListener('submit', async (ev)=>{
+        ev.preventDefault();
+        const name = (profileName.value||'').trim();
+        if(name.length < 2 || name.length > 24){ alert('Display name must be 2–24 characters'); return; }
+        if(!/^[\w \-\.]{2,24}$/.test(name)){ alert('Display name contains invalid characters'); return; }
+        // check uniqueness
+        const existing = JSON.parse(localStorage.getItem('agh_user')||'null');
+        if(isNameTaken(name) && !(existing && existing.name === name)){
+          if(!confirm('This display name is already used in this browser. Continue anyway?')) return;
+        }
+        // build user obj
+        const f = profileAvatarInput.files && profileAvatarInput.files[0];
+        if(f){ const r = new FileReader(); r.onload = function(e){ const data = e.target.result; const u = { name, provider: _pendingProvider || 'local', avatar: data }; saveUserObject(u); // register in user list
+              try{ const arr = JSON.parse(localStorage.getItem('agh_users')||'[]'); if(arr.indexOf(name)===-1) arr.push(name); localStorage.setItem('agh_users', JSON.stringify(arr)); }catch(e){}
+            }; r.readAsDataURL(f); }
+        else { const u = { name, provider: _pendingProvider || 'local' }; saveUserObject(u); try{ const arr = JSON.parse(localStorage.getItem('agh_users')||'[]'); if(arr.indexOf(name)===-1) arr.push(name); localStorage.setItem('agh_users', JSON.stringify(arr)); }catch(e){} }
+        document.getElementById('profile-success').style.display = 'block'; setTimeout(()=>{ document.getElementById('profile-success').style.display='none' }, 2200);
+      });
+
+      // initialise
+      updateHeader();
+    })();
+  </script>
+  <script>
+    // Header autocomplete that queries Jikan (MyAnimeList) and shows suggestions.
+    (function(){
+      const input = document.getElementById('search-input');
+      const list = document.getElementById('autocomplete-list');
+      let controller = null;
+      let debounceTimer = null;
+      let items = [];
+      let selected = -1;
+
+      function clearList(){ list.innerHTML=''; list.hidden = true; items = []; selected = -1; }
+
+      function renderResults(results){
+        clearList();
+        if(!results || results.length===0) return;
+        results.forEach((it, idx)=>{
+          const el = document.createElement('div');
+          el.className = 'autocomplete-item';
+          el.setAttribute('role','option');
+          el.dataset.title = it.title;
+          el.dataset.url = it.url;
+          el.dataset.mal = it.mal_id;
+          const imgUrl = (it.images && (it.images.jpg?.image_url || it.images.webp?.image_url)) || '';
+          el.innerHTML = `
+            ${imgUrl? `<img class="autocomplete-thumb" src="${imgUrl}" alt="${it.title} poster">` : `<div class="autocomplete-thumb"></div>`}
+            <div>
+              <div class="autocomplete-title">${it.title}</div>
+              <div class="autocomplete-sub">${(it.synopsis||'').slice(0,120)}${(it.synopsis && it.synopsis.length>120)?'...':''}</div>
+            </div>
+          `;
+          el.addEventListener('click', ()=>{ location.href = 'news.html?search='+encodeURIComponent(it.title); });
+          list.appendChild(el);
+          items.push(el);
+        });
+        list.hidden = false;
+      }
+
+      function selectItem(index){
+        if(selected>=0 && items[selected]) items[selected].setAttribute('aria-selected','false');
+        selected = index;
+        if(selected>=0 && items[selected]){
+          items[selected].setAttribute('aria-selected','true');
+          // scroll into view
+          items[selected].scrollIntoView({block:'nearest'});
+        }
+      }
+
+      input.addEventListener('keydown', (e)=>{
+        if(list.hidden) return;
+        if(e.key === 'ArrowDown'){
+          e.preventDefault();
+          if(selected < items.length-1) selectItem(selected+1);
+          else selectItem(0);
+        } else if(e.key === 'ArrowUp'){
+          e.preventDefault();
+          if(selected > 0) selectItem(selected-1);
+          else selectItem(items.length-1);
+        } else if(e.key === 'Enter'){
+          if(selected>=0 && items[selected]){
+            e.preventDefault();
+            items[selected].click();
+          }
+        } else if(e.key === 'Escape'){
+          clearList();
+        }
+      });
+
+      input.addEventListener('input', (e)=>{
+        const q = (e.target.value||'').trim();
+        if(debounceTimer) clearTimeout(debounceTimer);
+        if(controller){ controller.abort(); controller = null; }
+        if(q.length < 2){ clearList(); return; }
+        debounceTimer = setTimeout(async ()=>{
+          try{
+            // Prefer local top-150 cache when available to provide instant suggestions
+            const localQ = q.toLowerCase();
+            try{
+              const top = JSON.parse(localStorage.getItem('agh_top150_anime')||'[]');
+              if(Array.isArray(top) && top.length){
+                const matched = top.filter(it=> (it.title||'').toLowerCase().includes(localQ)).slice(0,6).map(d=>({ title:d.title, synopsis:d.synopsis||'', url:d.url||'', mal_id:d.mal_id, images: { jpg: { image_url: d.image } } }));
+                if(matched.length){ renderResults(matched); return; }
+              }
+            }catch(e){ /* ignore local parse errors */ }
+
+            controller = new AbortController();
+            const res = await fetch('https://api.jikan.moe/v4/anime?q='+encodeURIComponent(q)+'&limit=6', {signal: controller.signal});
+            if(!res.ok) throw new Error('Jikan error');
+            const json = await res.json();
+            const results = (json.data || []).map(d=>({
+              title: d.title,
+              synopsis: d.synopsis,
+              url: d.url,
+              mal_id: d.mal_id,
+              images: d.images
+            }));
+            renderResults(results);
+          }catch(err){
+            // ignore aborts, hide list on errors
+            if(err.name !== 'AbortError') clearList();
+          }
+        }, 300);
+      });
+
+      // close when clicking outside
+      document.addEventListener('click', (e)=>{
+        if(!document.querySelector('.autocomplete')?.contains(e.target)) clearList();
+      });
+    })();
+  </script>
+    <script>
+      // header following count updater (shared)
+      (function(){
+        function updateFollowingCount(){
+          try{
+            const u = JSON.parse(localStorage.getItem('agh_user')||'null');
+            if(!u){
+              document.querySelectorAll('#following-count').forEach(el=>el.textContent = 0);
+              document.querySelectorAll('#following-link').forEach(el=>el.style.display = 'none');
+              return;
+            }
+            const id = u.provider+':'+(u.name||u.provider);
+            const follows = JSON.parse(localStorage.getItem('agh_follows_'+id)||'[]');
+            document.querySelectorAll('#following-count').forEach(el=>el.textContent = follows.length);
+            document.querySelectorAll('#following-link').forEach(el=>el.style.display = 'inline-flex');
+          }catch(e){}
+        }
+        updateFollowingCount();
+        window.addEventListener('storage', updateFollowingCount);
+      })();
+    </script>
+      <script src="assets/news-assistant.js"></script>
+      <script src="assets/notify.js"></script>
+</body>
+</html>       

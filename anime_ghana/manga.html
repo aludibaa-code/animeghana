@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Manga — Anime Ghana</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="logo" href="index.html">
+        <img src="assets/logo.svg" alt="Anime Ghana logo">
+        <span class="site-title">Anime Ghana</span>
+      </a>
+      <nav>
+        <ul class="nav">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="community.html">Community</a></li>
+          <li><a href="news.html">News</a></li>
+          <li><a href="manga.html">Manga</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </nav>
+      <div class="header-utilities">
+        <a id="following-link" class="following-link" href="community.html?view=following">Following (<span id="following-count">0</span>)</a>
+        <a id="notif-link" class="following-link" href="moderation.html" style="display:none">🔔 <span id="notif-count">0</span></a>
+      </div>
+    </div>
+  </header>
+  <main class="container">
+    <h2>Manga & Webtoons</h2>
+    <p class="muted">Curated manga and webtoon picks. Click a card for reading links and summaries.</p>
+
+    <div style="display:flex;gap:10px;align-items:center;margin-top:12px">
+      <div class="search-form" style="flex:1">
+        <input id="manga-search" placeholder="Search manga or webtoons (try 'Solo Leveling')" style="width:100%;border:0;outline:0;padding:10px;background:#fff;border-radius:8px;box-shadow:inset 0 1px 0 rgba(2,6,23,0.03)">
+      </div>
+      <button id="populate-samples" class="post-btn">Populate 150 samples</button>
+    </div>
+
+    <section style="margin-top:12px">
+      <div id="manga-results" class="manga-grid" aria-live="polite"></div>
+      <div id="manga-more" style="margin-top:12px;text-align:center"></div>
+    </section>
+
+    <script>
+      (function(){
+        const input = document.getElementById('manga-search');
+        const results = document.getElementById('manga-results');
+        const more = document.getElementById('manga-more');
+        let controller = null; let page=1; let lastQ='';
+
+        function renderItems(items){
+          results.innerHTML = '';
+          items.forEach(it=>{
+            const card = document.createElement('article'); card.className='manga-card';
+            const img = (it.images && (it.images.jpg?.image_url || it.images.webp?.image_url)) || it.img || '';
+            card.innerHTML = `
+              ${img? `<img src="${img}" alt="${it.title} cover">` : `<div style="height:200px;background:linear-gradient(90deg,#f3f6ff,#fff);display:flex;align-items:center;justify-content:center;color:#667;">No image</div>`}
+              <div class="manga-body">
+                <h4>${it.title}</h4>
+                <p class="muted">${(it.synopsis||it.desc||'').slice(0,140)}</p>
+                <div style="display:flex;gap:8px;margin-top:10px">
+                  <a class="ext-btn" href="${it.url||it.link||'#'}" target="_blank" rel="noopener noreferrer">Read</a>
+                  <button class="post-btn bookmark-btn" data-slug="${(it.mal_id||it.slug||'').toString()}">Save</button>
+                </div>
+              </div>
+            `;
+            results.appendChild(card);
+          });
+          results.querySelectorAll('.bookmark-btn').forEach(btn=>btn.addEventListener('click', e=>{
+            const slug = e.currentTarget.dataset.slug;
+            const arr = JSON.parse(localStorage.getItem('agh_manga_bookmarks')||'[]');
+            const ix = arr.indexOf(slug);
+            if(ix!==-1){ arr.splice(ix,1); e.currentTarget.textContent='Save' } else { arr.push(slug); e.currentTarget.textContent='Saved' }
+            localStorage.setItem('agh_manga_bookmarks', JSON.stringify(arr));
+          }));
+        }
+
+        async function search(q, p=1){
+          if(!q) return results.innerHTML = '<p class="muted">Enter a search term above to find manga/webtoons.</p>';
+          if(controller){ controller.abort(); }
+          controller = new AbortController();
+          lastQ = q; page = p;
+          more.innerHTML = 'Searching...';
+          try{
+            const res = await fetch('https://api.jikan.moe/v4/manga?q='+encodeURIComponent(q)+'&limit=20&page='+p, {signal: controller.signal});
+            if(!res.ok) throw new Error('Jikan: '+res.status);
+            const json = await res.json();
+            const items = (json.data||[]).map(d=>({ title: d.title, images: d.images, synopsis: d.synopsis, url: d.url, mal_id: d.mal_id }));
+            renderItems(items);
+            more.innerHTML = `<button id="more-btn" class="post-btn">Load more</button>`;
+            document.getElementById('more-btn').addEventListener('click', ()=>search(q, page+1));
+          }catch(err){ if(err.name!=='AbortError') results.innerHTML = '<p class="muted">Search failed: '+err.message+'</p>'; more.innerHTML=''; }
+        }
+
+        // debounce
+        let t; input.addEventListener('input', (e)=>{ clearTimeout(t); t = setTimeout(()=>{ search(e.target.value.trim()); }, 350); });
+
+        // populate 150 samples (requires confirmation)
+        document.getElementById('populate-samples').addEventListener('click', async ()=>{
+          if(!confirm('Populate 150 sample manga entries using the Jikan API? This will perform multiple network requests and store results locally for demo purposes.')) return;
+          more.innerHTML = 'Populating 150 samples — please wait...';
+          const collected = []; let pg=1; try{
+            while(collected.length < 150 && pg < 40){
+              const res = await fetch('https://api.jikan.moe/v4/top/manga?page='+pg+'&limit=25');
+              if(!res.ok) break;
+              const js = await res.json();
+              (js.data||[]).forEach(d=>{ if(collected.length<150) collected.push({ title:d.title, images:d.images, synopsis:d.synopsis, url:d.url, mal_id:d.mal_id }); });
+              pg++;
+            }
+            localStorage.setItem('agh_manga_samples', JSON.stringify(collected));
+            renderItems(collected);
+            more.innerHTML = 'Populated '+collected.length+' samples.';
+          }catch(err){ more.innerHTML = 'Failed to populate samples: '+err.message }
+        });
+
+        // render existing samples if any
+        const existing = JSON.parse(localStorage.getItem('agh_manga_samples')||'null');
+        if(existing){ renderItems(existing); more.innerHTML = 'Loaded '+existing.length+' saved samples.'; }
+        else results.innerHTML = '<p class="muted">Use the search box to find manga or click Populate to fetch demo samples.</p>';
+
+      })();
+    </script>
+  </main>
+  <footer class="site-footer"><div class="container"><p>&copy; 2025 Anime Ghana</p></div></footer>
+    <script>
+      // header following count updater (shared)
+      (function(){
+        function updateFollowingCount(){
+          try{
+            const follows = JSON.parse(localStorage.getItem('agh_follows')||'[]');
+            document.querySelectorAll('#following-count').forEach(el=>el.textContent = follows.length);
+          }catch(e){}
+        }
+        updateFollowingCount();
+        window.addEventListener('storage', updateFollowingCount);
+      })();
+    </script>
+</body>
+</html>

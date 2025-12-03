@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Moderation Dashboard — Anime Ghana</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="logo" href="index.html"><img src="assets/logo.svg" alt="Anime Ghana logo"><span class="site-title">Anime Ghana</span></a>
+      <nav>
+        <ul class="nav">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="community.html">Community</a></li>
+          <li><a href="news.html">News</a></li>
+          <li><a href="manga.html">Manga</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </nav>
+      <div class="header-utilities">
+        <a id="following-link" class="following-link" href="community.html?view=following" style="display:none">Following (<span id="following-count">0</span>)</a>
+        <a id="notif-link" class="following-link" href="moderation.html" style="display:none">🔔 <span id="notif-count">0</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Moderation Dashboard</h2>
+    <p class="muted">Review pending posts, send notification emails, and publish site announcements.</p>
+
+    <section style="margin-top:12px">
+      <h3>Pending Posts</h3>
+      <div id="pending-list" class="posts-list"></div>
+    </section>
+
+    <section style="margin-top:12px">
+      <h3>Pending News Posts</h3>
+      <div id="pending-news-list" class="posts-list"></div>
+    </section>
+
+    <section style="margin-top:18px">
+      <h3>Send Email Notification</h3>
+      <p class="muted">Simulate sending an email to site subscribers (stored in localStorage for demo).</p>
+      <div style="display:grid;gap:8px;max-width:720px;margin-top:8px">
+        <input id="email-subject" placeholder="Subject">
+        <textarea id="email-body" placeholder="Message body" rows="4"></textarea>
+        <div style="display:flex;gap:8px">
+          <button id="send-email" class="post-btn">Send Email</button>
+          <button id="clear-emails" class="post-btn" style="background:#e53e3e">Clear Sent</button>
+        </div>
+        <div id="sent-list" style="margin-top:12px"></div>
+      </div>
+    </section>
+
+    <section style="margin-top:18px">
+      <h3>Announcements</h3>
+      <p class="muted">Create an announcement that appears on the News page.</p>
+      <div style="display:grid;gap:8px;max-width:720px;margin-top:8px">
+        <input id="announce-title" placeholder="Title">
+        <textarea id="announce-body" placeholder="Announcement body" rows="3"></textarea>
+        <button id="publish-announcement" class="post-btn">Publish Announcement</button>
+      </div>
+      <div id="ann-list" style="margin-top:12px"></div>
+    </section>
+    <section style="margin-top:18px">
+      <h3>Verified Users & Anime</h3>
+      <p class="muted">Manage verified users and verified anime (original works).</p>
+      <div style="display:flex;gap:12px;margin-top:8px">
+        <div style="flex:1">
+          <h4>Verified Users</h4>
+          <div id="verified-users-list" class="muted"></div>
+        </div>
+        <div style="flex:1">
+          <h4>Verified Anime Slugs</h4>
+          <div id="verified-anime-list" class="muted"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="container"><p>&copy; 2025 Anime Ghana</p></div></footer>
+
+  <script>
+    // Moderation dashboard logic
+    (function(){
+      const pendingEl = document.getElementById('pending-list');
+      const notifCount = document.getElementById('notif-count');
+      const notifLink = document.getElementById('notif-link');
+
+      function loadPosts(){ try{return JSON.parse(localStorage.getItem('agh_posts')||'[]')}catch(e){return[]} }
+      function savePosts(a){ localStorage.setItem('agh_posts', JSON.stringify(a)) }
+
+      function loadSent(){ try{return JSON.parse(localStorage.getItem('agh_sent_emails')||'[]')}catch(e){return[]} }
+      function saveSent(a){ localStorage.setItem('agh_sent_emails', JSON.stringify(a)) }
+
+      function renderPending(){
+        const posts = loadPosts().filter(p=>p.status === 'pending');
+        pendingEl.innerHTML = '';
+        if(posts.length===0) pendingEl.innerHTML = '<p class="muted">No pending posts.</p>';
+        posts.forEach(p=>{
+          const card = document.createElement('article'); card.className='post-card';
+          card.innerHTML = `
+            ${p.image? `<img src="${p.image}" alt="post image">` : ''}
+            <div class="card-body"><h4>${p.title}</h4><p class="muted">by ${p.author}</p><p>${p.content}</p>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="post-btn" data-approve="${p.id}">Approve</button>
+              <button class="post-btn" data-reject="${p.id}" style="background:#e53e3e">Reject</button>
+            </div></div>`;
+          pendingEl.appendChild(card);
+        });
+        // attach handlers
+        pendingEl.querySelectorAll('[data-approve]').forEach(b=>b.addEventListener('click', e=>{
+          const id = e.currentTarget.dataset.approve; const all = loadPosts(); const post = all.find(x=>x.id===id); if(!post) return; post.status='approved'; savePosts(all); renderPending(); updateNotif();
+        }));
+        pendingEl.querySelectorAll('[data-reject]').forEach(b=>b.addEventListener('click', e=>{
+          const id = e.currentTarget.dataset.reject; const all = loadPosts(); const post = all.find(x=>x.id===id); if(!post) return; post.status='rejected'; savePosts(all); renderPending(); updateNotif();
+        }));
+      }
+
+      function updateNotif(){ const n = loadPosts().filter(p=>p.status==='pending').length; notifCount.textContent = n; notifLink.style.display = n>0 ? 'inline-flex' : 'none'; }
+
+      // email send
+      document.getElementById('send-email').addEventListener('click', ()=>{
+        const subj = document.getElementById('email-subject').value.trim();
+        const body = document.getElementById('email-body').value.trim();
+        if(!subj || !body) return alert('Please provide subject and message');
+        const sent = loadSent(); sent.push({id:Date.now(),subject:subj,body,at:Date.now()}); saveSent(sent); renderSent(); alert('Email simulated and stored locally.');
+      });
+      document.getElementById('clear-emails').addEventListener('click', ()=>{ if(confirm('Clear sent emails?')){ localStorage.removeItem('agh_sent_emails'); renderSent(); } });
+      function renderSent(){ const s = loadSent(); const el = document.getElementById('sent-list'); el.innerHTML = s.length? s.map(x=>`<div class="muted">${new Date(x.at).toLocaleString()} • <strong>${x.subject}</strong></div>`).join('') : '<p class="muted">No sent emails</p>'; }
+
+      // announcements
+      function loadAnnouncements(){ try{return JSON.parse(localStorage.getItem('agh_announcements')||'[]')}catch(e){return[]} }
+      function saveAnnouncements(a){ localStorage.setItem('agh_announcements', JSON.stringify(a)) }
+      document.getElementById('publish-announcement').addEventListener('click', ()=>{
+        const t = document.getElementById('announce-title').value.trim(); const b = document.getElementById('announce-body').value.trim(); if(!t||!b) return alert('Provide title and body'); const arr = loadAnnouncements(); arr.unshift({id:Date.now(),title:t,body:b,at:Date.now(),author: (JSON.parse(localStorage.getItem('agh_user')||'null')||{name:'Admin'}).name}); saveAnnouncements(arr); renderAnnouncements(); alert('Announcement published');
+      });
+      function renderAnnouncements(){ const a = loadAnnouncements(); const el = document.getElementById('ann-list'); el.innerHTML = a.length? a.map(x=>`<div class="post-card"><div class="card-body"><h4>${x.title}</h4><p class="muted">by ${x.author} • ${new Date(x.at).toLocaleString()}</p><p>${x.body}</p></div></div>`).join('') : '<p class="muted">No announcements</p>'; }
+
+      renderPending(); renderSent(); renderAnnouncements(); updateNotif();
+      // keep updated when storage changes
+      window.addEventListener('storage', ()=>{ renderPending(); renderSent(); renderAnnouncements(); updateNotif(); });
+      // Pending news posts
+      function loadNewsPosts(){ try{return JSON.parse(localStorage.getItem('agh_news_posts')||'[]')}catch(e){return[]} }
+      function saveNewsPosts(a){ localStorage.setItem('agh_news_posts', JSON.stringify(a)) }
+      function renderPendingNews(){ const list = document.getElementById('pending-news-list'); const posts = loadNewsPosts().filter(p=>p.status==='pending'); list.innerHTML=''; if(posts.length===0) list.innerHTML='<p class="muted">No pending news posts.</p>'; posts.forEach(p=>{ const card = document.createElement('article'); card.className='post-card'; card.innerHTML = `<div class="card-body"><h4>${p.title}</h4><p class="muted">by ${p.author}${p.anime? ' • tagged: '+p.anime : ''}</p><p>${p.body}</p><div style="display:flex;gap:8px;margin-top:8px"><button class="post-btn" data-approve-news="${p.id}">Approve</button><button class="post-btn" data-reject-news="${p.id}" style="background:#e53e3e">Reject</button></div></div>`; list.appendChild(card); });
+        // handlers
+        list.querySelectorAll('[data-approve-news]').forEach(b=>b.addEventListener('click', e=>{ const id = e.currentTarget.dataset.approveNews; const all = loadNewsPosts(); const post = all.find(x=>x.id===id); if(!post) return; post.status='approved'; saveNewsPosts(all); renderPendingNews(); }));
+        list.querySelectorAll('[data-reject-news]').forEach(b=>b.addEventListener('click', e=>{ const id = e.currentTarget.dataset.rejectNews; const all = loadNewsPosts(); const post = all.find(x=>x.id===id); if(!post) return; post.status='rejected'; saveNewsPosts(all); renderPendingNews(); }));
+      }
+      // Verified lists
+      function loadVerifiedUsers(){ try{return JSON.parse(localStorage.getItem('agh_verified_users')||'[]')}catch(e){return[]} }
+      function loadVerifiedAnime(){ try{return JSON.parse(localStorage.getItem('agh_verified_anime')||'[]')}catch(e){return[]} }
+      function renderVerifiedLists(){ const vu = loadVerifiedUsers(); const va = loadVerifiedAnime(); document.getElementById('verified-users-list').innerHTML = vu.length? vu.map(u=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>${u}</span><button class=\"post-btn\" data-unverify-user=\"${u}\">Unverify</button></div>`).join('') : '<p class="muted">No verified users</p>'; document.getElementById('verified-anime-list').innerHTML = va.length? va.map(a=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span>${a}</span><button class=\"post-btn\" data-unverify-anime=\"${a}\">Unverify</button></div>`).join('') : '<p class="muted">No verified anime</p>';
+        // bind
+        document.querySelectorAll('[data-unverify-user]').forEach(b=>b.addEventListener('click', e=>{ const u = e.currentTarget.dataset.unverifyUser; const list = loadVerifiedUsers(); const idx = list.indexOf(u); if(idx!==-1){ list.splice(idx,1); localStorage.setItem('agh_verified_users', JSON.stringify(list)); renderVerifiedLists(); } }));
+        document.querySelectorAll('[data-unverify-anime]').forEach(b=>b.addEventListener('click', e=>{ const s = e.currentTarget.dataset.unverifyAnime; const list = loadVerifiedAnime(); const idx = list.indexOf(s); if(idx!==-1){ list.splice(idx,1); localStorage.setItem('agh_verified_anime', JSON.stringify(list)); renderVerifiedLists(); } }));
+      }
+      // run extra renders
+      renderPendingNews(); renderVerifiedLists();
+
+      // refresh when storage changes
+      window.addEventListener('storage', ()=>{ renderPendingNews(); renderVerifiedLists(); });
+      // include notify updater for badge
+      try{ const s = document.createElement('script'); s.src='assets/notify.js'; document.body.appendChild(s); }catch(e){}
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Community - Anime Ghana</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="logo" href="index.html">
+        <img src="assets/logo.svg" alt="Anime Ghana logo">
+        <span class="site-title">Anime Ghana</span>
+      </a>
+      <nav>
+        <ul class="nav">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="community.html">Community</a></li>
+          <li><a href="news.html">News</a></li>
+          <li><a href="manga.html">Manga</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </nav>
+      <div class="header-utilities">
+        <a id="following-link" class="following-link" href="community.html?view=following">Following (<span id="following-count">0</span>)</a>
+      </div>
+    </div>
+  </header>
+  <main class="container">
+    <section class="community-hero">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <div>
+          <h2>Community</h2>
+          <p class="muted">Share posts, images and updates - posts are stored locally in your browser for this demo.</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <a href="community.html" class="following-link">All</a>
+          <a href="community.html?view=following" class="following-link">Following</a>
+        </div>
+      </div>
+      <form id="post-form" class="post-form" aria-label="Create a community post">
+        <input id="post-title" type="text" placeholder="Post title" required>
+        <textarea id="post-content" placeholder="Write something to share..." required></textarea>
+        <input id="post-image" type="url" placeholder="Optional image URL (or leave blank)">
+        <select id="post-community" aria-label="Post to community (optional)">
+          <option value="">Post publicly (no community)</option>
+        </select>
+        <div class="row">
+          <button type="submit" class="post-btn">Publish</button>
+          <button type="button" id="clear-posts" class="post-btn" style="background:#e53e3e">Clear all</button>
+        </div>
+      </form>
+      <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+        <button id="enter-moderator" class="post-btn" style="background:#444;">Moderator</button>
+        <div id="moderator-status" class="muted">Moderator: <span id="mod-flag">off</span></div>
+      </div>
+    </section>
+    <section>
+      <h3 id="posts-title">Recent posts</h3>
+      <div id="posts" class="posts-list" aria-live="polite"></div>
+    </section>
+    <section id="communities-root" style="margin-top:18px">
+      <!-- Communities UI will be mounted here by assets/community.js -->
+    </section>
+  </main>
+  <script src="assets/community.js"></script>
+  <script> // mount communities UI or a specific community page when ?comm=<id>
+    (function(){
+      try{
+        const params = new URLSearchParams(location.search);
+        const comm = params.get('comm');
+        if(window.AGCommunity){
+          if(comm){ window.AGCommunity.mountCommunityPage(comm); }
+          else if(document.getElementById('communities-root')) window.AGCommunity.mountUI();
+        }
+      }catch(e){ console.warn(e); }
+    })();
+  </script>
+  <script>
+    (function(){
+      const form = document.getElementById('post-form');
+      const postsEl = document.getElementById('posts');
+      const clearBtn = document.getElementById('clear-posts');
+      const modBtn = document.getElementById('enter-moderator');
+      const modFlag = document.getElementById('mod-flag');
+
+      function loadPosts(){
+        try{ return JSON.parse(localStorage.getItem('agh_posts')||'[]') }catch(e){ return [] }
+      }
+      function savePosts(arr){ localStorage.setItem('agh_posts', JSON.stringify(arr)); }
+
+      // moderation helpers
+      function isModerator(){ return localStorage.getItem('agh_is_admin') === 'true' }
+      function setModerator(v){ localStorage.setItem('agh_is_admin', v? 'true' : ''); }
+
+      function timeAgo(ts){ const s = Math.floor((Date.now()-ts)/1000); if(s<60) return s+'s'; if(s<3600) return Math.floor(s/60)+'m'; if(s<86400) return Math.floor(s/3600)+'h'; return Math.floor(s/86400)+'d'; }
+
+      function renderPosts(){
+        const params = new URLSearchParams(location.search);
+        const view = params.get('view') || '';
+        const postsRaw = loadPosts();
+        const follows = (function(){ try{ const id = (function(){ try{ const u=JSON.parse(localStorage.getItem('agh_user')||'null'); return u? (u.provider+':'+(u.name||u.provider)) : null }catch(e){return null} })(); if(!id) return []; return JSON.parse(localStorage.getItem('agh_follows_'+id)||'[]') }catch(e){return[]} })();
+        let posts = postsRaw.slice().reverse();
+        const mod = isModerator();
+        if(view === 'following'){
+          posts = posts.filter(p => follows.indexOf(p.author || 'Anon') !== -1);
+          document.getElementById('posts-title').textContent = 'Posts from people you follow';
+        } else {
+          document.getElementById('posts-title').textContent = 'Recent posts';
+        }
+        postsEl.innerHTML = '';
+        // filter posts for visibility: show approved posts to everyone; show pending only to moderators or the post's author
+        posts = posts.filter(p=>{
+          if(!p.status || p.status==='approved') return true;
+          const user = JSON.parse(localStorage.getItem('agh_user')||'null');
+          if(mod) return true;
+          if(user && user.name === p.author) return true; // author can see own pending
+          return false;
+        });
+        if(posts.length===0){ postsEl.innerHTML = '<p class="muted">No posts yet - be the first to share something!</p>'; return; }
+        posts.forEach(p=>{
+            const follows = loadFollows();
+            const followerCounts = loadFollowerCounts();
+            const author = p.author || 'Anon';
+            const isFollowing = follows.indexOf(author) !== -1;
+            const followerCount = followerCounts[author] || 0;
+
+            const card = document.createElement('article');
+            card.className = 'post-card';
+            const statusBadge = (p.status && p.status!=='approved')? `<div style="position:absolute;right:12px;top:12px;padding:6px 8px;border-radius:8px;background:#fff;border:1px solid rgba(2,6,23,0.06);font-weight:600">${p.status}</div>` : '';
+            let adminControls = '';
+            if(p.status === 'pending' && mod){
+              adminControls = `<button class="post-btn" data-approve="${p.id}" style="background:#2b6cb0">Approve</button> <button class="post-btn" data-reject="${p.id}" style="background:#e53e3e">Reject</button>`;
+            }
+            // prepare comment count
+            const comments = (function(){ try{return JSON.parse(localStorage.getItem('agh_comments_'+p.id)||'[]')}catch(e){return[]} })();
+            const commentCount = (comments && comments.length) || 0;
+            card.innerHTML = `
+              ${p.image? `<img src="${p.image}" alt="post image">` : ''}
+              ${statusBadge}
+                    <div class="meta">
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <div class="muted author-name">${escapeHtml(author)}</div>
+                        <button class="follow-btn ${isFollowing? 'following':''}" data-author="${escapeHtml(author)}">${isFollowing? 'Following':'Follow'}</button>
+                        ${ (currentUserId() && isModerator()? `<div class="muted follower-count">${followerCount} followers</div>` : (currentUserId()? `<div class="muted follower-count">${followerCount} followers</div>` : '')) }
+                      </div>
+                      <div class="muted">${timeAgo(p.created)}</div>
+                    </div>
+              <h4>${escapeHtml(p.title)}</h4>
+              <p>${escapeHtml(p.content)}</p>
+              <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+                <button class="post-btn btn-like" data-id="${p.id}">❤ ${p.likes||0}</button>
+                <button class="post-btn" data-del="${p.id}" style="background:#e53e3e">Delete</button>
+                ${adminControls}
+                <button class="post-btn" data-toggle-comments="${p.id}">💬 ${commentCount}</button>
+              </div>
+              <div class="comments" id="comments-${p.id}" style="margin-top:8px;display:none"></div>
+            `;
+          postsEl.appendChild(card);
+        });
+        // attach handlers
+          postsEl.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click', e=>{
+            const id = e.currentTarget.dataset.del;
+            const all = loadPosts();
+            const post = all.find(x=>x.id===id);
+            const user = JSON.parse(localStorage.getItem('agh_user')||'null');
+            const mod = isModerator();
+            // only allow delete for author or moderator
+            if(post){
+              if((user && user.name === post.author) || mod){
+                const arr = all.filter(x=>x.id!==id);
+                savePosts(arr); renderPosts();
+              } else {
+                alert('Only the author or a moderator can delete this post.');
+              }
+            }
+          }));
+            postsEl.querySelectorAll('.btn-like').forEach(b=>b.addEventListener('click', e=>{
+              const id = e.currentTarget.dataset.id;
+              const arr = loadPosts().map(x=>{ if(x.id===id){ x.likes=(x.likes||0)+1 } return x });
+              savePosts(arr); renderPosts();
+            }));
+
+          // comment toggle and rendering
+          postsEl.querySelectorAll('[data-toggle-comments]').forEach(b=>b.addEventListener('click', e=>{
+            const id = e.currentTarget.dataset.toggleComments;
+            const container = document.getElementById('comments-'+id);
+            if(!container) return;
+            const visible = container.style.display !== 'none';
+            container.style.display = visible ? 'none' : 'block';
+            if(visible) return;
+            // render comments
+            function loadComments(){ try{return JSON.parse(localStorage.getItem('agh_comments_'+id)||'[]')}catch(e){return[]} }
+            function saveComments(a){ localStorage.setItem('agh_comments_'+id, JSON.stringify(a)) }
+            const comments = loadComments();
+            container.innerHTML = '';
+            const list = document.createElement('div'); list.style.display='grid'; list.style.gap='8px';
+            comments.forEach(c=>{ const el = document.createElement('div'); el.className='post-card'; el.innerHTML = `<div class="card-body"><div class="muted">${new Date(c.at).toLocaleString()} • ${c.author || 'Anon'}</div><p>${escapeHtml(c.text)}</p></div>`; list.appendChild(el); });
+            container.appendChild(list);
+            const frm = document.createElement('div'); frm.innerHTML = `<textarea id="comment-input-${id}" placeholder="Write a comment" style="width:100%;min-height:60px"></textarea><div style="display:flex;gap:8px;margin-top:6px"><button class="post-btn" id="comment-send-${id}">Reply</button></div>`;
+            container.appendChild(frm);
+            document.getElementById('comment-send-'+id).addEventListener('click', ()=>{
+              const txt = document.getElementById('comment-input-'+id).value.trim(); if(!txt) return; const user = JSON.parse(localStorage.getItem('agh_user')||'null'); const c = {id:String(Date.now()), text:txt, at:Date.now(), author: user?user.name:'Anon'}; comments.push(c); saveComments(comments); // update comment button count
+              renderPosts();
+            });
+          }));
+
+            // approve/reject handlers (for moderators)
+            postsEl.querySelectorAll('[data-approve]').forEach(b=>b.addEventListener('click', e=>{
+              const id = e.currentTarget.dataset.approve;
+              const all = loadPosts();
+              const post = all.find(x=>x.id===id);
+              if(!post) return;
+              if(!isModerator()){ alert('Moderator only'); return; }
+              post.status = 'approved';
+              savePosts(all); renderPosts();
+            }));
+            postsEl.querySelectorAll('[data-reject]').forEach(b=>b.addEventListener('click', e=>{
+              const id = e.currentTarget.dataset.reject;
+              const all = loadPosts();
+              const post = all.find(x=>x.id===id);
+              if(!post) return;
+              if(!isModerator()){ alert('Moderator only'); return; }
+              post.status = 'rejected';
+              savePosts(all); renderPosts();
+            }));
+
+          // follow/unfollow handlers
+          // follows are stored per logged-in user: key 'agh_follows_<userid>'
+          function currentUserId(){ try{ const u = JSON.parse(localStorage.getItem('agh_user')||'null'); return u? (u.provider+':'+(u.name||u.provider)) : null }catch(e){return null} }
+          function loadFollowsForUser(){ const id = currentUserId(); if(!id) return []; try{ return JSON.parse(localStorage.getItem('agh_follows_'+id)||'[]') }catch(e){return[]} }
+          function saveFollowsForUser(a){ const id = currentUserId(); if(!id) return; localStorage.setItem('agh_follows_'+id, JSON.stringify(a)) }
+          function loadFollowerCounts(){ try{ return JSON.parse(localStorage.getItem('agh_follower_counts')||'{}') }catch(e){ return {} } }
+          function saveFollowerCounts(o){ localStorage.setItem('agh_follower_counts', JSON.stringify(o)) }
+
+          postsEl.querySelectorAll('.follow-btn').forEach(btn=>btn.addEventListener('click', e=>{
+            const author = e.currentTarget.dataset.author || 'Anon';
+            const userId = currentUserId();
+            if(!userId){
+              // prompt sign-in
+              document.getElementById('auth-modal').style.display = 'flex';
+              return;
+            }
+            const follows = loadFollowsForUser();
+            const counts = loadFollowerCounts();
+            const idx = follows.indexOf(author);
+            if(idx !== -1){
+              // unfollow
+              follows.splice(idx,1);
+              counts[author] = Math.max(0, (counts[author]||1)-1);
+            } else {
+              follows.push(author);
+              counts[author] = (counts[author]||0)+1;
+            }
+            saveFollowsForUser(follows); saveFollowerCounts(counts);
+            // update header following count for this user only
+            try{ document.querySelectorAll('#following-count').forEach(el=>el.textContent = follows.length); }catch(e){}
+            renderPosts();
+          }));
+      }
+
+      function escapeHtml(s){ return String(s||'').replace(/[&<>\"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" }[c])); }
+
+      form.addEventListener('submit', e=>{
+        e.preventDefault();
+        const title = document.getElementById('post-title').value.trim();
+        const content = document.getElementById('post-content').value.trim();
+        const image = document.getElementById('post-image').value.trim();
+        if(!title || !content) return;
+        const user = JSON.parse(localStorage.getItem('agh_user')||'null');
+          const communityId = (document.getElementById('post-community')||{}).value || '';
+          const post = { id: String(Date.now()) + '-' + Math.random().toString(36).slice(2,8), title, content, image: image||'', community: communityId, created: Date.now(), author: user?user.name:'Anon', likes:0, status: (isModerator()? 'approved' : 'pending') };
+        const arr = loadPosts(); arr.push(post); savePosts(arr); form.reset(); renderPosts();
+      });
+
+      clearBtn.addEventListener('click', ()=>{ if(confirm('Clear all local posts?')){ localStorage.removeItem('agh_posts'); renderPosts(); } });
+      // moderator button behavior
+      function updateModUI(){ try{ modFlag.textContent = isModerator() ? 'on' : 'off'; modBtn.textContent = isModerator() ? 'Exit moderator' : 'Moderator'; }catch(e){} }
+      modBtn.addEventListener('click', ()=>{
+        if(isModerator()){
+          if(confirm('Exit moderator mode?')){ setModerator(false); updateModUI(); renderPosts(); }
+          return;
+        }
+        // prompt for passphrase (default: 'agh-admin')
+        const p = prompt('Enter moderator passphrase:');
+        const expected = localStorage.getItem('agh_admin_pass') || 'agh-admin';
+        if(p === expected){ setModerator(true); updateModUI(); alert('Moderator mode enabled'); renderPosts(); }
+        else alert('Incorrect passphrase');
+      });
+
+      updateModUI();
+
+      // initial render
+      renderPosts();
+      // populate community dropdown for posting
+      try{
+        const sel = document.getElementById('post-community');
+        if(sel){
+          const comms = (function(){ try{return JSON.parse(localStorage.getItem('agh_communities')||'[]')}catch(e){return[]} })();
+          comms.forEach(c=>{ const opt = document.createElement('option'); opt.value = c.id; opt.textContent = c.title; sel.appendChild(opt); });
+        }
+      }catch(e){}
+    })();
+  </script>
+  <script src="assets/notify.js"></script>
+  <!-- Auth modal (copied here so pages that open it can find it) -->
+  <div class="modal-backdrop" id="auth-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 id="auth-title">Sign in to Anime Ghana</h3>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <p>Choose a provider to continue (this demo simulates sign-in locally).</p>
+      <div class="social-list">
+        <button class="social-btn google" data-provider="google" aria-label="Continue with Google">
+          <svg class="icon" width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
+            <rect width="32" height="32" rx="6" fill="#4285F4"></rect>
+            <text x="16" y="21" font-family="Segoe UI, Arial, sans-serif" font-size="16" text-anchor="middle" fill="#fff">G</text>
+          </svg>
+          Continue with Google
+        </button>
+        <button class="social-btn tiktok" data-provider="tiktok" aria-label="Continue with TikTok">
+          <svg class="icon" width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
+            <rect width="32" height="32" rx="6" fill="#111"></rect>
+            <text x="16" y="21" font-family="Segoe UI, Arial, sans-serif" font-size="14" text-anchor="middle" fill="#fff">t</text>
+          </svg>
+          Continue with TikTok
+        </button>
+        <button class="social-btn instagram" data-provider="instagram" aria-label="Continue with Instagram">
+          <svg class="icon" width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
+            <defs>
+              <linearGradient id="igGrad" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%" stop-color="#f09433" />
+                <stop offset="50%" stop-color="#e6683c" />
+                <stop offset="100%" stop-color="#cc2366" />
+              </linearGradient>
+            </defs>
+            <rect width="32" height="32" rx="6" fill="url(#igGrad)"></rect>
+            <text x="16" y="21" font-family="Segoe UI, Arial, sans-serif" font-size="14" text-anchor="middle" fill="#fff">I</text>
+          </svg>
+          Continue with Instagram
+        </button>
+        <button class="social-btn discord" data-provider="discord" aria-label="Continue with Discord">
+          <svg class="icon" width="32" height="32" viewBox="0 0 24 24" aria-hidden="true" role="img">
+            <rect width="24" height="24" rx="5" fill="#5865F2"></rect>
+            <path fill="#FFFFFF" d="M7.2 8.6c0 0-0.6 0.8-0.7 1.6 0 0 1.1-0.2 1.6-0.2 0 0 0.1-1 0.1-1.3 0 0-0.9-0.1-1-0.1zM16.8 8.6c0 0 0.6 0.8 0.7 1.6 0 0-1.1-0.2-1.6-0.2 0 0-0.1-1-0.1-1.3 0 0 0.9-0.1 1-0.1zM12 18.5c-2.5 0-4.6-1.1-6.1-2.9 0 0 0.7 0.3 1.3 0.5 0 0 0.9 0.8 5 0.8s5-0.8 5-0.8c0.6-0.2 1.3-0.5 1.3-0.5-1.5 1.8-3.6 2.9-6.1 2.9zM8.6 11.2c0 0.9 0.8 1.6 1.8 1.6s1.8-0.7 1.8-1.6-0.8-1.6-1.8-1.6-1.8 0.7-1.8 1.6zM13.8 11.2c0 0.9 0.8 1.6 1.8 1.6s1.8-0.7 1.8-1.6-0.8-1.6-1.8-1.6-1.8 0.7-1.8 1.6z"/>
+          </svg>
+          Continue with Discord
+        </button>
+      </div>
+    </div>
+  </div>
+  <footer class="site-footer"><div class="container"><p>&copy; 2025 Anime Ghana</p></div></footer>
+</body>
+</html>

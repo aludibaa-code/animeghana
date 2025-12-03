@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>About — Anime Ghana</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="logo" href="index.html">
+        <img src="assets/logo.svg" alt="Anime Ghana logo">
+        <span class="site-title">Anime Ghana</span>
+      </a>
+      <nav>
+        <ul class="nav">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="community.html">Community</a></li>
+          <li><a href="news.html">News</a></li>
+          <li><a href="manga.html">Manga</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </nav>
+      <div class="header-utilities">
+        <a id="following-link" class="following-link" href="community.html?view=following" style="display:none">Following (<span id="following-count">0</span>)</a>
+        <a id="notif-link" class="following-link" href="moderation.html" style="display:none">🔔 <span id="notif-count">0</span></a>
+      </div>
+    </div>
+  </header>
+  <main class="container">
+    <h2>About Anime Ghana</h2>
+    <p class="muted">Anime Ghana is a community-driven hub connecting anime and manga fans across Ghana and beyond. Below is a directory of organizations and events — add your event to share with the community.</p>
+
+    <section style="margin-top:18px;position:relative;overflow:hidden;border-radius:12px">
+      <div style="position:absolute;inset:0;z-index:0;pointer-events:none">
+        <img src="assets/about-bg.svg" alt="decorative background" style="width:100%;height:100%;object-fit:cover;opacity:0.95;filter:contrast(1.05)">
+      </div>
+      <div style="position:relative;z-index:1;padding:18px;background:linear-gradient(180deg,rgba(255,255,255,0.6),rgba(255,255,255,0.8))">
+      
+      
+      
+      
+      
+    
+      <h3>Organizations & Events</h3>
+      <form id="event-form" style="margin-top:10px;display:grid;gap:8px;max-width:720px">
+        <input id="evt-name" type="text" placeholder="Event or Organization name" required>
+        <input id="evt-country" type="text" placeholder="Country (e.g., Ghana)" required>
+        <input id="evt-date" type="date" placeholder="Date (optional)">
+        <input id="evt-link" type="url" placeholder="Website or event link (optional)">
+        <div style="display:flex;gap:8px">
+          <button id="add-event" class="post-btn" type="button">Add event</button>
+          <button id="clear-events" class="post-btn" style="background:#e53e3e" type="button">Clear all</button>
+        </div>
+      </form>
+
+      <div style="margin-top:12px">
+        <label for="filter-country" class="muted">Filter by country:</label>
+        <select id="filter-country"><option value="">All</option></select>
+      </div>
+
+      <div id="orgs" class="org-list"></div>
+      </div>
+    </section>
+
+    <script>
+      (function(){
+        const formBtn = document.getElementById('add-event');
+        const clearBtn = document.getElementById('clear-events');
+        const orgsEl = document.getElementById('orgs');
+        const sel = document.getElementById('filter-country');
+
+        const sample = [
+          {id:'a1',name:'Anime Ghana Meetup',country:'Ghana',date:'2025-07-12',link:''},
+          {id:'a2',name:'Lagos Anime Fest',country:'Nigeria',date:'2025-09-05',link:'https://example.com'},
+          {id:'a3',name:'Animation & Anime Expo',country:'USA',date:'2026-07-xx',link:'https://example.com'}
+        ];
+
+        function load(){ try{return JSON.parse(localStorage.getItem('agh_events')||JSON.stringify(sample))}catch(e){return sample} }
+        function save(a){ localStorage.setItem('agh_events', JSON.stringify(a)) }
+
+        function render(){
+          const all = load();
+          const countries = Array.from(new Set(all.map(x=>x.country))).sort();
+          sel.innerHTML = '<option value="">All</option>' + countries.map(c=>`<option value="${c}">${c}</option>`).join('');
+          const filter = sel.value;
+          const display = filter? all.filter(x=>x.country===filter) : all;
+          orgsEl.innerHTML = '';
+          if(display.length===0) orgsEl.innerHTML = '<p class="muted">No events found.</p>';
+          display.forEach(o=>{
+            const el = document.createElement('div'); el.className='org-card';
+            el.innerHTML = `<h4>${o.name}</h4><p class="muted">${o.country}${o.date? ' • '+o.date: ''}</p>${o.link? `<p><a class="ext-btn" href="${o.link}" target="_blank" rel="noopener noreferrer">Visit</a></p>`: ''}`;
+            orgsEl.appendChild(el);
+          });
+        }
+
+        sel.addEventListener('change', render);
+
+        formBtn.addEventListener('click', ()=>{
+          const name = document.getElementById('evt-name').value.trim();
+          const country = document.getElementById('evt-country').value.trim();
+          const date = document.getElementById('evt-date').value;
+          const link = document.getElementById('evt-link').value.trim();
+          if(!name || !country) return alert('Please provide a name and country');
+          const arr = load();
+          arr.push({id: String(Date.now()), name, country, date, link});
+          save(arr); render(); document.getElementById('evt-name').value=''; document.getElementById('evt-country').value=''; document.getElementById('evt-date').value=''; document.getElementById('evt-link').value='';
+        });
+
+        clearBtn.addEventListener('click', ()=>{ if(confirm('Clear all events?')){ localStorage.removeItem('agh_events'); render(); } });
+
+        render();
+      })();
+    </script>
+  </main>
+  <footer class="site-footer"><div class="container"><p>&copy; 2025 Anime Ghana</p></div></footer>
+  <script>
+    // header following count updater (shared)
+    (function(){
+      function updateFollowingCount(){
+        try{
+          const u = JSON.parse(localStorage.getItem('agh_user')||'null');
+          if(!u){ document.querySelectorAll('#following-count').forEach(el=>el.textContent = 0); document.querySelectorAll('#following-link').forEach(el=>el.style.display='none'); return; }
+          const id = u.provider+':'+(u.name||u.provider);
+          const follows = JSON.parse(localStorage.getItem('agh_follows_'+id)||'[]');
+          document.querySelectorAll('#following-count').forEach(el=>el.textContent = follows.length);
+          document.querySelectorAll('#following-link').forEach(el=>el.style.display='inline-flex');
+        }catch(e){}
+      }
+      updateFollowingCount();
+      window.addEventListener('storage', updateFollowingCount);
+    })();
+  </script>
+</body>
+</html>
